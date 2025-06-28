@@ -1,6 +1,9 @@
 package storage
 
 import (
+	"encoding/json"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -19,18 +22,81 @@ type Vault struct {
 }
 
 func NewVault() *Vault {
-	return &Vault {
-		Version : 1,
-		Entries : make(map[string]*Entry),
+	return &Vault{
+		Version: 1,
+		Entries: make(map[string]*Entry),
 	}
 }
 
-func (v *Vault) AddEntry(entry * Entry){
+func (v *Vault) AddEntry(entry *Entry) {
+	now := time.Now()
+	entry.CreatedAt = now
+	entry.UpdatedAt = now
+	v.Entries[entry.Name] = entry
 
 }
 
-func (v *Vault) GetEntry(name string) (* Entry) {
+func (v *Vault) GetEntry(name string) *Entry {
+	entry, _ := v.Entries[name]
+	return entry
 
 }
 
-func
+func (v *Vault) DeleteEntry(name string) bool {
+	if _, exists := v.Entries[name]; exists {
+		delete(v.Entries, name)
+		return true
+	}
+	return false
+
+}
+
+func (v *Vault) ListEntries() []string {
+	names := make([]string, 0, len(v.Entries))
+
+	for name, _ := range v.Entries {
+		names = append(names, name)
+	}
+	return names
+}
+
+func (v *Vault) ToJSON() ([]byte, error) {
+	return json.Marshal(v)
+}
+
+func FromJSON(data []byte) (*Vault, error) {
+	var v Vault
+
+	err := json.Unmarshal(data, &v)
+	if err != nil {
+		return nil, err
+	}
+	return &v, nil
+
+}
+
+func GetVaultPath() (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(homeDir, ".secrets-vault"), nil
+}
+
+func VaultExists() (bool, error) {
+	path, err := GetVaultPath()
+	if err != nil {
+		return false, err
+	}
+	_, err = os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+
+	return false, err
+}
