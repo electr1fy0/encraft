@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/electr1fy0/encraft/internal/crypto"
+	"github.com/electr1fy0/encraft/storage"
 )
 
 func testCrypto() {
@@ -29,6 +30,48 @@ func testCrypto() {
 
 }
 
+func testVault() {
+	fmt.Println("Testing vault functionality...")
+	vault := storage.NewVault()
+	entry := &storage.Entry{
+		Name:     "Kylo the Doge",
+		Password: "meowmeowmeow47",
+		Notes:    "who put this cat here",
+		URL:      "https://google.com",
+	}
+
+	vault.AddEntry(entry)
+
+	pass := "kylo4ever"
+	err := storage.SaveVault(vault, pass)
+	if err != nil {
+		fmt.Println("Error saving to vault: ", err)
+		return
+	}
+
+	fmt.Println("Vault saved")
+
+	loaded, err := storage.LoadVault(pass)
+	if err != nil {
+		fmt.Println("Error loading vault: ", err)
+		return
+	}
+
+	loadedEntry, exists := loaded.GetEntry("Kylo the Doge")
+	if !exists {
+		fmt.Println("Error loading entry inside vault: ", exists)
+		return
+	}
+
+	if loadedEntry.Password == entry.Password {
+		fmt.Println("Vault test passed")
+	} else {
+		fmt.Println("Vault test failed")
+	}
+
+}
+
 func main() {
 	testCrypto()
+	testVault()
 }

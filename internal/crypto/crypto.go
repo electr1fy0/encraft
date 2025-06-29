@@ -15,7 +15,7 @@ import (
 const (
 	saltSize   = 32
 	keySize    = 32
-	iterations = 10_000
+	iterations = 100_000
 )
 
 type EncryptedData struct {

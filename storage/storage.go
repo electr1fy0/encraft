@@ -37,11 +37,9 @@ func (v *Vault) AddEntry(entry *Entry) {
 	v.Entries[entry.Name] = entry
 
 }
-
-func (v *Vault) GetEntry(name string) *Entry {
-	entry, _ := v.Entries[name]
-	return entry
-
+func (v *Vault) GetEntry(name string) (*Entry, bool) {
+	entry, exists := v.Entries[name]
+	return entry, exists
 }
 
 func (v *Vault) DeleteEntry(name string) bool {
