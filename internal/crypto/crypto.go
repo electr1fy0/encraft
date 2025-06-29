@@ -47,7 +47,7 @@ func Encrypt(plaintext []byte, pass string) (*EncryptedData, error) {
 	}
 
 	key := deriveKey(pass, salt)
-	clearBytes(key)
+	defer clearBytes(key)
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err

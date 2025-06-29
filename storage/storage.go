@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/electr1fy0/encraft/internal/crypto"
 )
 
 type Entry struct {
@@ -99,4 +101,52 @@ func VaultExists() (bool, error) {
 	}
 
 	return false, err
+}
+
+func SaveVault(vault *Vault, password string) error {
+	jsonData, err := vault.ToJSON()
+	if err != nil {
+		return err
+	}
+	encryptedData, err := crypto.Encrypt(jsonData, password)
+	if err != nil {
+		return err
+	}
+
+	encryptedJSON, err := json.Marshal(encryptedData)
+	if err != nil {
+		return err
+	}
+
+	path, err := GetVaultPath()
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(path, encryptedJSON, 0600)
+
+}
+
+func LoadVault(pass string) (*Vault, error) {
+	path, err := GetVaultPath()
+	if err != nil {
+		return nil, err
+	}
+
+	encryptedJSON, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	var encryptedData crypto.EncryptedData
+	if err := json.Unmarshal(encryptedJSON, &encryptedData); err != nil {
+		return nil, err
+	}
+
+	jsonData, err := crypto.Decrypt(encryptedData, pass)
+	if err != nil {
+		return nil, err
+	}
+
+	return FromJSON(jsonData)
 }
