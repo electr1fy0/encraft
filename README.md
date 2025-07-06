@@ -1,6 +1,8 @@
 # 🔐 Encraft
 
 Minimal WIP password manager built in Go — with encrypted storage,both web UI (HTMX + Templ), and CLI support.
+
+
 <img width="720" alt="enc" src="https://github.com/user-attachments/assets/176baf67-47ab-4f27-a710-d1618c6b8b97" />
 
 
