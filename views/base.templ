@@ -1,0 +1,294 @@
+package views
+
+import "github.com/electr1fy0/encraft/storage"
+
+templ Page(name string) {
+    <!doctype html>
+    <html>
+        <head>
+            <title>encraft - Password Manager</title>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.js" integrity="sha384-ksKjJrwjL5VxqAkAZAVOPXvMkwAykMaNYegdixAESVr+KqLkKE8XBDoZuwyWVUDv" crossorigin="anonymous"></script>
+            <style>
+              :root {
+                color-scheme: dark;
+
+                --bg: #09090b;
+                --fg: #f4f4f5;
+                --muted: #a1a1aa;
+                --accent: #fafafa;
+                --radius: 6px;
+                --border: 1px solid #27272a;
+                --surface: #1c1c1f;
+                --surface-light: #2a2a2e;
+                --btn-bg: #18181b;
+                --btn-hover: #3f3f46;
+                --success: #22c55e;
+                --error: #ef4444;
+                --link: #60a5fa;
+              }
+
+              body {
+                font-family: system-ui, sans-serif;
+                background: var(--bg);
+                color: var(--fg);
+                max-width: 540px;
+                margin: 4em auto;
+                padding: 0 1.25em;
+                line-height: 1.6;
+                font-size: 16px;
+              }
+
+              h1 {
+                font-size: 1.8em;
+                margin-bottom: 0.3em;
+                font-weight: 600;
+              }
+
+              h2 {
+                font-size: 1.3em;
+                margin-top: 2em;
+                margin-bottom: 0.5em;
+                font-weight: 500;
+              }
+
+              form,
+              .entry,
+              .success-message,
+              .error-message {
+                background: var(--surface);
+                border: var(--border);
+                border-radius: var(--radius);
+                padding: 1em;
+                margin-bottom: 1.5em;
+                box-shadow: 0 0 0 1px #27272a;
+              }
+
+              input,
+              textarea,
+              button {
+                font: inherit;
+                padding: 0.5em 0.75em;
+                margin-top: 0.5em;
+                margin-bottom: 1em;
+                width: 100%;
+                border: 1px solid #3f3f46;
+                border-radius: var(--radius);
+                background: var(--surface-light);
+                color: var(--fg);
+                box-sizing: border-box;
+              }
+
+              input::placeholder,
+              textarea::placeholder {
+                color: var(--muted);
+              }
+
+              button {
+                background: var(--btn-bg);
+                color: var(--fg);
+                border: 1px solid #3f3f46;
+                cursor: pointer;
+                transition: background 0.2s ease, border-color 0.2s ease;
+              }
+
+              button:hover {
+                background: var(--btn-hover);
+                border-color: #52525b;
+              }
+
+              nav button {
+                margin-right: 0.5em;
+                width: auto;
+                display: inline-block;
+              }
+
+              code.password-field {
+                background: #2e2e34;
+                padding: 0.25em 0.5em;
+                border-radius: var(--radius);
+                font-size: 0.95em;
+                cursor: pointer;
+                display: inline-block;
+                margin-top: 0.3em;
+              }
+
+              .success-message {
+                color: var(--success);
+                background: #132d1f;
+                border-color: #15803d;
+              }
+
+              .error-message {
+                color: var(--error);
+                background: #2e1212;
+                border-color: #dc2626;
+              }
+
+              a {
+                color: var(--link);
+                text-decoration: none;
+              }
+
+              a:hover {
+                text-decoration: underline;
+              }
+            </style>
+        </head>
+        <body>
+            <div id="app-container">
+            <h1>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-icon lucide-key"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></svg>&nbsp;encraft</h1>
+
+                <div id="login-form">
+                    <div id="messages"></div>
+                    <h2>Enter Master Password</h2>
+                    <form hx-post="/api/login"
+                          hx-target="#app-container"
+                          hx-swap="innerHTML">
+                        <input type="password"
+                               name="password"
+                               id="password"
+                               placeholder="Master password"
+                               required />
+                        <button type="submit">Unlock Vault</button>
+                    </form>
+                </div>
+            </div>
+        </body>
+    </html>
+}
+
+templ MainApp(entries []*storage.Entry) {
+    <h1><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-icon lucide-key"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></svg>encraft</h1>
+    <div id="messages"></div>
+    <nav>
+        <button hx-get="/entries"
+                hx-target="#content"
+                hx-swap="innerHTML">View Entries</button>
+        <button hx-get="/add-form"
+                hx-target="#content"
+                hx-swap="innerHTML">Add Entry</button>
+        <button hx-post="/logout"
+                hx-target="#app-container"
+                hx-swap="innerHTML">Logout</button>
+    </nav>
+    <div id="content">
+    @EntriesList(entries)
+    </div>
+}
+
+
+templ EntriesList(entries []*storage.Entry) {
+    <h2>Password Entries</h2>
+    <div id="entries-list">
+        if len(entries) == 0 {
+            <p>No entries found.</p>
+        } else {
+            for _, entry := range entries {
+                <div class="entry">
+                    <div class="entry-name">{entry.Name}</div>
+                    <div class="entry-details">
+                        <div><strong>Password:</strong>
+                            <code class="password-field"
+                                  style="cursor: pointer;"
+                                  onclick="copyToClipboard('{entry.Password}')">{entry.Password}</code>
+                        </div>
+                        if entry.URL != "" {
+                            <div><strong>URL:</strong>
+                                <a href={templ.URL(entry.URL)} target="_blank" rel="noopener noreferrer">{entry.URL}</a>
+                            </div>
+                        }
+                        if entry.Notes != "" {
+                            <div><strong>Notes:</strong> {entry.Notes}</div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+}
+
+
+templ AddEntryForm() {
+    <h2>Add New Entry</h2>
+    <div id="messages"></div>
+    <form hx-post="/api/entries"
+          hx-target="#messages"
+          hx-swap="innerHTML">
+        <input type="text"
+               name="name"
+               placeholder="Entry name"
+               required />
+        <input type="password"
+               name="password"
+               placeholder="Password"
+               required />
+        <input type="text"
+               name="url"
+               placeholder="URL (optional)" />
+        <textarea name="notes"
+                  placeholder="Notes (optional)"
+                  rows="3"></textarea>
+        <button type="submit">Add Entry</button>
+    </form>
+}
+
+
+templ AddEntrySuccess() {
+    <div class="success-message">Entry added successfully!</div>
+    <script>
+        htmx.ajax('GET', '/entries', {target: '#content'});
+        document.querySelector('form').reset();
+    </script>
+}
+
+
+templ ErrorMessage(message string) {
+    <div class="error-message">{message}</div>
+}
+
+
+templ SuccessMessage(message string) {
+    <div class="success-message">{message}</div>
+}
+
+
+// (after logout)
+templ LoginForm() {
+	<h1><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-icon lucide-key"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></svg>encraft</h1>
+    <div id="login-form">
+        <div id="messages"></div>
+        <h2>Enter Master Password</h2>
+        <form hx-post="/api/login"
+              hx-target="#app-container"
+              hx-swap="innerHTML">
+            <input type="password"
+                   name="password"
+                   id="password"
+                   placeholder="Master password"
+                   required />
+            <button type="submit">Unlock Vault</button>
+        </form>
+    </div>
+}
+
+templ CreateVaultForm() {
+    <h1>Create Vault</h1>
+    <div id="messages"></div>
+    <h2>Set a Master Password</h2>
+    <form hx-post="/api/create-vault"
+          hx-target="#app-container"
+          hx-swap="innerHTML">
+        <input type="password"
+               name="password"
+               placeholder="New master password"
+               required />
+        <input type="password"
+               name="confirm"
+               placeholder="Confirm password"
+               required />
+        <button type="submit">Create Vault</button>
+    </form>
+}

@@ -33,7 +33,7 @@ func generateSalt() ([]byte, error) {
 	return salt, err
 }
 
-// use pkb fn to gen key
+// use pkb fn to gen key ; same fixed one function procedural to memorize really sha256 is the hash function iirc
 func deriveKey(pass string, salt []byte) []byte {
 	return pbkdf2.Key([]byte(pass), salt, iterations, keySize, sha256.New)
 
